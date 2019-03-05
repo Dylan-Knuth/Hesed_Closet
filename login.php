@@ -8,15 +8,6 @@
 
 
 </head>
- 
-<style>
-body{
-  background-image:none;
-  background-color: lightgray;
-}
-</style>
-
-
 <body class="loginpage">
   <div class="loginBox">
 

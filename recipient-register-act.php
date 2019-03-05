@@ -41,7 +41,7 @@ if (isset($_POST['reg_recip'])) {
 
     if ($count == 0) {  
    	
-  	$query = "INSERT INTO recipients (recipient_id, first_name, last_name, dob) 
+  	$query = "INSERT INTO recipients (hesed_id, first_name, last_name, dob) 
   	VALUES('$userid', '$first_name', '$last_name', '$dob')";
   	
   	mysqli_query($conn, $query);       //insert into database
@@ -80,8 +80,9 @@ if(isset($_POST["upload_btn"])) {
             $item1 = mysqli_real_escape_string($conn, $data[0]);  
             $item2 = mysqli_real_escape_string($conn, $data[1]);
             $item3 = mysqli_real_escape_string($conn, $data[2]);
+            $item4 = mysqli_real_escape_string($conn, $data[3]);
             
-            $csv_query = "INSERT into recipients (first_name, last_name, dob) values('$item1','$item2','$item3')";
+            $csv_query = "INSERT into recipients (hesed_id,first_name, last_name, dob) values('$item1','$item2','$item3', '$item4')";
             
             mysqli_query($conn, $csv_query);
             

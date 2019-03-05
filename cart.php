@@ -1,13 +1,19 @@
 <?php
 session_start();
 ?>
-
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shopping Cart</title>
+</head>
+<body>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
 <style>
+
     h2{
     text-align: center;
     font-size: 22px;
@@ -24,9 +30,6 @@ session_start();
 
 
 </style>
-
-
-<title>Shopping Cart</title>
 
 <div class="container" style="width: 90%">
     <form method="POST" action="order.php">
@@ -51,7 +54,7 @@ session_start();
 
 
 
-<form method="post" action="cart.php?action=add&item_id= <?php echo $row["item_id"]; ?>">
+<form method="post" action="cart.php?action=add&item_id=<?php echo $row["item_id"]; ?>">
                 <div class="card" style="width:15rem;">
                   <div class="card-body">
                     <h5 class="card-title" style="font-size: 15px;"><?php echo $row["item_name"]; ?></h5>
@@ -93,73 +96,69 @@ session_start();
                             <tr>
                                 <td><?php echo $value["product_name"]; ?></td>
                                 <td><?php echo $value["product_qty"]; ?></td>   
-                                <td><a href="cart.php?action=delete&item_id=<?php echo $value["item_id"]; ?>"><span
+                                <td><a href="cart.php?action=delete&item_id=<?php echo $value["product_id"]; ?>"><span
                                     class="text-danger">Remove Item</span></a></td>
 
                                 </tr>
                                 <?php
                             }
                         } 
-            // echo '<script>
-            // window.location.href=cart.php
-            // </script>';
 
                         ?>
                     </table>
                 </div>
 
-            <!-- ADD TO CART -->
 
-            <?php include 'sql_connection.php';
+</body>
+</html>
+<?php
+
+
+include 'sql_connection.php';
 
 
 
-            if(isset($_GET["action"] )){
-                if($_GET["action"] == "add"){
+if(isset($_GET["action"] )){
+    if($_GET["action"] == "add"){
 
         //     ADD TO END CART IF CART ISNT EMPTY       
+        // $item_id=$_GET["item_id"]
+        if (isset($_SESSION["cart"])){
 
-                    if (!empty($_SESSION["cart"])){
+            $item_array_id = array_column($_SESSION["cart"], "product_id");
 
-                        $item_array_id = array_column($_SESSION["cart"], "item_id");
+            if (!in_array($_GET["item_id"], $item_array_id)){
+                $count = count($_SESSION["cart"]);
+                $item_array = array(
+                    'product_id' => $_GET["item_id"],
+                    'product_name' => $_POST["hidden_name"],
+                    'product_qty' => $_POST["quantity"]
+                );
 
-                        if (!in_array($_GET["item_id"], $item_array_id)){
-
-                            $count = count($_SESSION["cart"]);
-
-                            $item_array = array(
-                                'item_id' => $_GET["item_id"],
-                                'product_name' => $_POST["hidden_name"],
-                                'product_qty' => $_POST["quantity"]
-                            );
-
-                            $_SESSION["cart"][$count] = $item_array;
-
-                            echo '<script>alert("Adding to cart!!")</script>';
-                            echo "<script> window.location.href ='cart.php'  </script>";
-                        }
+                $_SESSION["cart"][$count] = $item_array;
+                echo '<script>alert("Adding to cart!!")</script>';
+            }
+                
                 //  IF ITEM IS IN CART, DO NOT ADD AND ALERT USER
-                        else{
-                            echo '<script>alert("Product is already in cart")</script>';
-                            echo '<script>window.location=cart.php</script>';
-                        }
-                    }
-//                  ADD TO FRONT OF CART IF CART EMPTY
-                    else{
-                        $item_array = array(    
-                            'item_id' => $_GET["item_id"],
-                            'product_name' => $_POST["hidden_name"],
-                            'product_qty' => $_POST["quantity"]
-                        );
-                        $_SESSION["cart"][0] = $item_array;
-                        echo '<script>alert("Adding to cart!!")</script>';
 
-        }echo "<script> window.location.href ='cart.php'  </script>";  //echo '<script>window.location.replace("cart.php")</script>';
+            else{
+                echo '<script>alert("Product is already in cart")</script>';
+            }
+        }
+//                  ADD TO FRONT OF CART IF CART EMPTY
+        else{
+            $item_array = array(    
+                'product_id' => $_GET["item_id"],
+                'product_name' => $_POST["hidden_name"],
+                'product_qty' => $_POST["quantity"]
+            );
+            $_SESSION["cart"][0] = $item_array;
+            echo '<script>alert("Adding to cart!!")</script>';
+
+        }echo "<script> window.location.href ='cart.php'  </script>";  
         
     }
 }
-
-
 
 
 //      ------ DELETE FROM CART -----
@@ -167,7 +166,7 @@ session_start();
 if(isset($_GET["action"] )){
     if($_GET["action"] == "delete"){
         foreach ($_SESSION["cart"] as $keys => $value){
-            if ($value["item_id"] == $_GET["item_id"]){
+            if ($value["product_id"] == $_GET["item_id"]){
                 unset($_SESSION["cart"][$keys]);
                 echo '<script>alert("Product has been removed.")</script>';
                 echo '<script>window.location.replace("cart.php")</script>';
